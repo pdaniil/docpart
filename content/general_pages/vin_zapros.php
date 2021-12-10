@@ -5,17 +5,6 @@
 
 defined('_ASTEXE_') or die('No access');
 
-//Для работы с пользователями
-require_once($_SERVER["DOCUMENT_ROOT"]."/content/users/dp_user.php");
-
-//Для отправки уведомлений
-require_once( $_SERVER["DOCUMENT_ROOT"]."/content/notifications/notify_helper.php" );
-
-if( !empty($_POST["send_vin_zapros"]) )
-{
-	//0. Проверяем согласие с Пользовательским соглашением
-	if( $_COOKIE["users_agreement"] != "yes" )
-	{
 		$error_message = "Запрос не отправлен. Необходимо принять Пользовательское соглашение";
         ?>
         <script>
