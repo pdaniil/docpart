@@ -1,0 +1,116 @@
+Найденные товары по артикулу PSR1450203 : 
+
+object(stdClass)#6 (6) {
+  ["error"]=>
+  NULL
+  ["fastenerList"]=>
+  object(stdClass)#7 (0) {
+  }
+  ["pressureSensorList"]=>
+  object(stdClass)#8 (0) {
+  }
+  ["rimList"]=>
+  object(stdClass)#9 (0) {
+  }
+  ["sparePartList"]=>
+  object(stdClass)#10 (0) {
+  }
+  ["tyreList"]=>
+  object(stdClass)#11 (1) {
+    ["TyreContainer"]=>
+    object(stdClass)#12 (46) {
+      ["aquaplaning"]=>
+      NULL
+      ["axle"]=>
+      string(0) ""
+      ["brand"]=>
+      string(11) "Bridgestone"
+      ["camera"]=>
+      NULL
+      ["code"]=>
+      string(10) "PSR1450203"
+      ["comfort"]=>
+      NULL
+      ["constr"]=>
+      string(1) "R"
+      ["diameter"]=>
+      string(5) "16.00"
+      ["diameter_out"]=>
+      string(4) "0.00"
+      ["height"]=>
+      string(5) "55.00"
+      ["img_big_my"]=>
+      string(83) "https://api-b2b.pwrs.ru/26160/pictures/tyres/Bridgestone/Turanza_T001/src/big_0.png"
+      ["img_big_pish"]=>
+      string(71) "http://www.4tochki.ru/pictures/tyres/Bridgestone/Turanza_T001/big/0.png"
+      ["img_small"]=>
+      string(73) "http://www.4tochki.ru/pictures/tyres/Bridgestone/Turanza_T001/small/0.png"
+      ["load_index"]=>
+      string(2) "94"
+      ["marka_html"]=>
+      NULL
+      ["marka_logo"]=>
+      NULL
+      ["marker_color"]=>
+      NULL
+      ["model"]=>
+      string(12) "Turanza T001"
+      ["model_html"]=>
+      NULL
+      ["moto_use"]=>
+      NULL
+      ["name"]=>
+      string(32) "205/55R16 94W XL Turanza T001 TL"
+      ["noise"]=>
+      NULL
+      ["omolog"]=>
+      string(0) ""
+      ["passability"]=>
+      NULL
+      ["protection"]=>
+      string(0) ""
+      ["protector_type"]=>
+      NULL
+      ["puncture"]=>
+      string(0) ""
+      ["season"]=>
+      string(1) "s"
+      ["side"]=>
+      string(0) ""
+      ["sloy"]=>
+      NULL
+      ["softness"]=>
+      NULL
+      ["speed_index"]=>
+      string(1) "W"
+      ["strengthening"]=>
+      bool(false)
+      ["sub_diameter"]=>
+      NULL
+      ["sub_diameter_out"]=>
+      NULL
+      ["subheight"]=>
+      NULL
+      ["subwidth"]=>
+      NULL
+      ["tech"]=>
+      string(0) ""
+      ["thorn"]=>
+      bool(false)
+      ["thorn_type"]=>
+      string(0) ""
+      ["tonnage"]=>
+      string(2) "XL"
+      ["type"]=>
+      string(3) "car"
+      ["usa"]=>
+      string(0) ""
+      ["use_type"]=>
+      NULL
+      ["wear_index"]=>
+      NULL
+      ["width"]=>
+      string(6) "205.00"
+    }
+  }
+}

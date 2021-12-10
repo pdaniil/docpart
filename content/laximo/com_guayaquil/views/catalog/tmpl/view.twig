@@ -1,0 +1,24 @@
+{% use 'blocks/wizardSearch.twig' %}
+{% use 'blocks/vinSearch.twig' %}
+{% use 'blocks/frameSearch.twig' %}
+{% use 'blocks/searchByOther.twig' %}
+{% use 'blocks/searchVehicle.twig' %}
+{% use 'blocks/oemSearch.twig' %}
+
+<div class="guayaquil_page_header">
+    <h1 class="">{{ cataloginfo.name }}</h1>
+</div>
+{{ block('searchVehicle') }}
+    {% if wizard %}
+        {{ block('wizardsearch') }}
+    {% endif %}
+
+    {% if useApplicability and showApplicability %}
+        {{ block('oemSearch') }}
+    {% endif %}
+
+    {% if otherSearch %}
+        {% for operation in otherSearch %}
+            {{ block('searchByOther') }}
+        {% endfor %}
+    {% endif %}

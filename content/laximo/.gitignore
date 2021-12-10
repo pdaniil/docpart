@@ -1,0 +1,10 @@
+syntax: glob
+vendor/
+.idea/
+revision.json
+composer.lock
+com_guayaquil/cache
+com_guayaquil/bin
+com_guayaquil/Config.php
+^com_guayaquil/Config.php
+/com_guayaquil/guayaquillib/cert/

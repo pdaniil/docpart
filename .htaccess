@@ -1,0 +1,17 @@
+AddDefaultCharset UTF-8
+
+#Убираем / в конце URL
+RewriteEngine On
+RewriteBase /
+RewriteCond %{HTTP_HOST} (.*)
+RewriteCond %{REQUEST_URI} /$ [NC]
+RewriteRule ^(.*)(/)$ $1 [L,R=301]
+
+#Включаем модуль mod_rewrite
+RewriteEngine On
+#Переадресация на адрес без www, как наиболее актуальный
+RewriteCond %{HTTP_HOST} ^www\.docpart$ [NC]
+RewriteRule ^(.*)$ http://docpart/$1 [R=301,L]
+#Переадресация на единую точку входа (index.php в корне сайта)
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule (.*) index.php

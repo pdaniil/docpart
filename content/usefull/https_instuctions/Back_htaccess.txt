@@ -1,0 +1,20 @@
+#!!! Нужно учитывать http и https.
+#Править: домен, протокол http/https, папку бэкенда
+#Переадресация с www на без www
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^(www\.domain\.ru)?$
+RewriteRule ^(.*)$ https://domain.ru/cp/$1 [R=301,L]
+
+
+#!!! Этот блок только для HTTPS
+#Переадресация всех запросов с http на https
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+
+#На единую точку входа
+RewriteEngine On
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule (.*) index.php

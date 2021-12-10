@@ -1,0 +1,573 @@
+Партнерское API сайта adkulan.kz
+API представляет собой веб-версис, принимающий в качестве параметров GET и POST запросы и возвращающий данные в JSON формате
+
+API доступно по адресу https://adkulan.kz/apiv2
+
+Каждый запрос к API должны содержать обязательные параметры:
+
+client - уникальный идентификатор клиента
+mod - вид запроса (допустимые варианты - account/rests/cart/orders)
+Каждый ответ API содержит массив, где:
+
+answer_code - статус, соответствующий коду состояния http
+error_text (если при выполнении запроса произошла ошибка) - текст ошибки
+
+Для того, чтобы получить ответ в удобном для прочтения виде (вместо JSON), добавьте в запрос параметр debug
+Другие параметры запросов и ответов:
+
+
+
+Пример подключения для PHP через CURL
+<?php
+
+//функция возврата данных по get-запросу (по URL)
+function get_url($url)
+{
+    //инифиализация CURL
+    $ch = curl_init();
+
+    //параметры curl
+    $options = [
+       CURLOPT_URL => $url,
+       CURLOPT_RETURNTRANSFER => true,
+       CURLOPT_HEADER => false,
+       CURLOPT_FOLLOWLOCATION => 1,
+
+       CURLOPT_SSL_VERIFYHOST => false,
+       CURLOPT_SSL_VERIFYPEER => false,
+       CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1,
+    ];
+
+    curl_setopt_array($ch, $options);
+
+    //запрос данных
+    $res = curl_exec($ch);
+    curl_close($ch);
+
+    //возврат результата в виде массива
+    return json_decode($res, true);
+}
+
+//формирование запроса
+$base_url = 'https://adkulan.kz/apiv2?';
+
+$http_qr = [
+   'client' => 'f98282abe6f80739b9f16baec15201i3',
+   'mod' => 'rests',
+   'code' => 'ik20',
+   'with_remotestores' => '1',
+];
+
+$url = $base_url . http_build_query($http_qr);
+
+//получение данных
+$data = get_url($url);
+
+//вывод данных (обработка)
+echo '<pre>';
+print_r($data);
+echo '</pre>';
+?>
+
+
+
+
+
+1. Модуль "Аккаунт"
+
+Запрос
+GET | POST
+params:
+    mod=account
+    client={ APIID клиента}
+Ответ
+массив с ключем account, в котором содержится информация об аккаунте
+
+[account] => Array
+(
+    [name] => Имя
+    [username] => Логин
+    [client_debd] => Задолженность
+)
+Примеры
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=account
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=account&debug
+
+
+2. Модуль "Остатки"
+Получение остатков происходи в два этапа. Первый шаг Сначала необходимо вытащить бренды, для этого отправте запрос Вывод брендов по артикулу, после чего получите списко брендов для этого артикула.Второй шаг сделайте запрос с выбранным выше брендом и артикулом, таким образом получите остатки по паре бренд|артикул.
+
+Вывод брендов по артикулу
+Запрос
+GET | POST
+params:
+    mod=rests
+    client={ APIID клиента}  !обязательный параметр
+    article={артикул товара} !обязательный параметр
+Ответ
+массив с ключем brands, в котором содержатся бренды с такми артикулом
+
+{
+  "brands": {
+    "items": {
+      "DENSO|IK20": {
+        "detailid": "id детали",
+        "formattedoem": "Артикула товара неотчищенный",
+        "manufacturer": "Производитель",
+        "manufacturerid": "id производителя",
+        "name": "Название продукта",
+        "oem": "Артикула товара отчищенный",
+        "weight": "Вес",
+        "instock": "Если true то товар находиться на складах компании"
+      }
+    }
+  },
+  "answer_code": 200
+}
+
+Примеры
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=rests&article=PH2820
+                            
+Запрос остатоков по бренду и артикулу
+Запрос
+GET | POST
+params:
+    mod=rests
+    client={ APIID клиента}  !обязательный параметр
+    article={артикул товара} !обязательный параметр
+    brand={название брэнда } !обязательный параметр
+    location= расположение товара
+                     all - на вcех складах  (по умолчанию)
+                     local - на складах компании
+                     partners - на складах партнеров
+Ответ
+массив с ключем rests, в котором содержатся остатки товара с запрошенным кодом
+
+{
+  "rests": {
+    "items": {
+      "DENSO|IK20": {
+        "detailid": "id детали",
+        "formattedoem": "Артикула товара неотчищенный",
+        "manufacturer": "Производитель",
+        "manufacturerid": "id производителя",
+        "name": "Название продукта",
+        "oem": "Артикула товара отчищенный",
+        "weight": "Вес",
+        "instock": "Если true то товар находиться на складах компании"
+        "replacements": { "Замены для этого артикула"
+          "NGK|3764": {
+            "detailid": "1146571",
+            "formattedoem": "3764",
+            "manufacturer": "NGK",
+            "manufacturerid": "15",
+            "oem": "3764",
+            "weight": 0,
+            "rate": 4,
+            "name": "BKR6EIX-11_свеча зажигания! Honda Civic, Mazda 323, Mitsubishi Galant 1.3-2.0i 89>",
+            "stocks": [ "Остатки замены для этого артикула"
+              {
+                "detailid": "79b40025-9d4b-11e3-bef3-00155d647f5f",
+                "name": "Свеча зажигания BKR6EIX-11",
+                "moq": "Минимальное количество штук к заказу",
+                "quantity": "Качество доставки в %. от 0 до 100.",
+                "delivery_max": "Дней на доставку",
+                "quality": "Количество товаров",
+                "store_name": "Название склада",
+                "store_id": "id склада",
+                "price": "Цена",
+                "brand": "NGK",
+                "delivery_min_date": "2017-02-03",
+                "delivery_max_date": "2017-02-03",
+                "delivery_price": "Цена доставки",
+                "discount": "Скидка"
+              }
+            ]
+          }
+        },
+        "stocks": [
+          {
+            "detailid": "69a0372a-eb26-11dd-bb07-00196616d816",
+            "name": "5304 / IK20 Denso свечи зажигания",
+            "moq": "1",
+            "quantity": 30,
+            "delivery_max": 1,
+            "quality": 5,
+            "store_name": "Склад Астана Автозапчасти",
+            "store_id": "627da9b8-2a18-11e2-ada7-3c4a92fa410c",
+            "price": 2458,
+            "brand": "DENSO",
+            "delivery_min_date": "2017-02-03",
+            "delivery_max_date": "2017-02-03",
+            "delivery_price": 0,
+            "discount": 0
+          }
+        ]
+      }
+    }
+  },
+  "answer_code": 200
+}
+Примеры
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=rests&code=IM1756514W&with_remotestores=1
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=rests&code=IM1756514W&with_remotestores=1&debug
+
+
+3. Модуль "Группы товаров"
+Запрос
+GET | POST
+params:
+    mod=product_types
+    client={ APIID клиента}
+Ответ
+массив с ключем product_types, в котором содержится информация о группах товаров и их свойствах
+
+[product_types] => Array
+(
+    [[items][x][id]] => Идентификатор группы товаров
+    [[items][x][title]] => Название группы товаров
+    [[items][x][parent]] => Идентификатор родительской группы товаров
+    [[items][x][ptype]] => Код группы товаров
+    [[items][x][fields]] => Параметры группы товаров
+    [[items][x][fields][y][name]] => Имя параметра
+    [[items][x][fields][y][description]] => Заголовок параметра
+)
+Примеры
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201c3&mod=ptypes
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201c3&mod=ptypes&help&debug
+
+
+4. Модуль "Каталог"
+Запрос
+GET | POST
+params:
+    mod=group
+    client={ APIID клиента}!обязательный параметр
+    ptype={код группы товаров} !обязательный параметр
+    with_remotestores={1/0} - показывать ли товары партнеров
+    count- количество возвращаемых товаров (если не установлено, то возвращаются все товары)
+    page- номер страницы (если установлен параметр count)
+    filter- массив параметров для фильтрации результатов запроса, уникальный для каждой группы товаров (подробнее в [params][enableFilters])
+    sort- способ сортировки списка (подробнее в [params][sortParams])
+    with_params={1/0} - возвращать ли параметры выборки и свойства товаров
+Ответ
+массив с ключем rests, в котором будут находиться остатки
+массив с ключем rests_fields с описанием ключей массива rests
+массив с ключем pagination с информацией о количестве записей и параметрах навигации (актуально, если задан параметр count)
+Если параметр запроса with_params=1, в ответ будут включен массив params с ключами:
+
+list - свойства товаров (в зависимости от группы товаров)
+fields - значения ключей свойств товаров
+active_sort - активный вид сортировки (можно задать в параметре sort)
+sortParams - возможные виды сортировки
+enableFilters - возможные фильтры и их значения
+enableFilters_fields - описание ключей массива enableFilters
+currentFiltersValues - активные (переданные в запросе и примененные) фильтры
+[products] => Array
+(
+    [[items][x][id]] => Идентификатор товара
+    [[items][x][description]] => Описание параметров товара
+    [[items][x][description][prod_{ptype}_*]] => Специфические для группы товаров параметры
+    [[items][x][description][prod_s_number]] => Артикул товара
+    [[items][x][description][prod_name]] => Наименование товара
+    [[items][x][description][image]] => ссылка на изображение товара
+    [[items][x][description][cnt]] => совокупное количество остатков товара
+    [[items][x][rests]] => Информация об остатках товара
+    [[items][x][rests][y][store_id]] => Идентификатор склада
+    [[items][x][rests][y][stock_amount]] => Количество остатков
+    [[items][x][rests][y][price_value]] => Цена
+    [[items][x][rests][y][store_name]] => Название склада
+    [[items][x][rests][y][store_delivery_time]] => Срок доставки до склада
+    [[items][x][rests][y][delivery_time]] => Срок доставки
+    [[items][x][rests][y][DDPercent]] => Вероятность наличия (в %)
+)
+
+[pagination] => Array
+(
+    [cur] => Текущая страница
+    [all] => Общее количество страниц
+    [onpage] => Количество товаров на странице
+    [records] => Общее количество товаров, найденных по запросу
+    [sort] => Способ сортировки (см. [cases][request_fields][group][sort])
+)
+
+[filters] => Array
+(
+    [[items][x][field]] => Фильтр
+    [[items][x][variants]] => Варианты фильтра
+    [[items][x][variants][y][value]] => Значение фильтра
+    [[items][x][variants][y][activ]] => Флаг активности фильтра
+    [[items][x][variants][y][*activ]] => Array
+        (
+            [1] => Значение активно (может быть использовано для дальнейшей фильтрации найденных товаров)
+            [0] => Значение не активно (не может быть использовано)
+        )
+
+    [[items][x][title]] => Заголовок фильтра
+    [[items][x][value]] => Выбранное (использованное при текущем запросе) значение фильтра
+)
+Примеры
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201c3&mod=ptypes
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201c3&mod=ptypes&help&debug
+
+
+5. Модуль "Корзина"
+GET | POST
+params:
+    mod=cart
+    client={ APIID клиента}  !обязательный параметр
+    action={действие} (необязательный параметр)
+        возможные значения:
+            add - добавление товара в корзину (предзаказ)
+            remove - удаление товара из корзины
+            change_count - изменение количества товара в корзине
+            order - оформление заказа
+Информация о корзине
+Запрос
+GET | POST
+params:
+    mod=cart
+    client={ APIID клиента}  !обязательный параметр
+Ответ
+массив в котором содержится информация о товарах в корзине
+
+{
+    "result": true,
+    "sum": "7 313,00",      // форматированная сумма
+    "quant": "4 товара",    // форматированое количестов товаров
+    "num": {
+        "sum": 7313,        // неформатированная сумма
+        "quant": 4          // неформатированое количестов товаров
+    },
+    "partners": {
+        "title": "Партнерские склады",
+        "id": "partners",
+        "items": [
+            {
+                "brand": "FEBI",
+                "article": "13424",
+                "price": 461,
+                "sum": 461,
+                "sum_total": 461,
+                "delivery_price": 0,
+                "delivery_time": "до 6 дней ( 18 Aug 2017 - 24 Aug 2017 )",
+                "delivery_date": "2017-08-24",
+                "store_name": "Караганда (MFEDD)",
+                "moq": "1",
+                "quant": "1",
+                "orderkey": "abaa4be2",
+                "elementid": "abaa4be2-c02c8f3a",
+                "active": true,
+                "discount": 0,
+                "cart_selected": true
+            }
+        ]
+    },
+    "local": [
+        {
+            "title": "Склад Караганда Автозапчасти",
+            "id": "ba8cac94-b305-11e6-ba0e-00155d648080",
+            "items": [
+                {
+                    "brand": "DENSO",
+                    "article": "IK20",
+                    "price": 2284,
+                    "sum": 2284,
+                    "sum_total": 2284,
+                    "delivery_price": 0,
+                    "delivery_time": "до 3 дня ( 18 Aug 2017 - 21 Aug 2017 )",
+                    "delivery_date": "2017-08-21",
+                    "store_name": "Склад Караганда Автозапчасти",
+                    "moq": "1",
+                    "quant": "1",
+                    "orderkey": "5a577a0a",
+                    "elementid": "5a577a0a-5d2d0108",
+                    "active": true,
+                    "discount": 0,
+                    "cart_selected": true
+                }
+            ]
+        },
+        {
+            "title": "Склад Астана Автозапчасти",
+            "id": "627da9b8-2a18-11e2-ada7-3c4a92fa410c",
+            "items": [
+                {
+                    "brand": "DENSO",
+                    "article": "IK20",
+                    "price": 2284,
+                    "sum": 2284,
+                    "sum_total": 2284,
+                    "delivery_price": 0,
+                    "delivery_time": "до 5 дней ( 18 Aug 2017 - 23 Aug 2017 )",
+                    "delivery_date": "2017-08-23",
+                    "store_name": "Склад Астана Автозапчасти",
+                    "moq": "1",
+                    "quant": "1",
+                    "orderkey": "5a577a0a",
+                    "elementid": "5a577a0a-84735fd0",
+                    "active": true,
+                    "discount": 0,
+                    "cart_selected": true
+                }
+            ]
+        }
+    ]
+}
+Добавление товара в корзину
+Запрос
+GET | POST
+params:
+    mod=cart
+    client={ APIID клиента}  !обязательный параметр
+    action=add
+    article={артикул товара} !обязательный параметр
+    brand={бренд товара} !обязательный параметр
+    stock_type={тип склада} !обязательный параметр
+    store_id={id склада} !обязательный параметр
+    quant={количество единиц товара} !обязательный параметр
+    orderkey={уникальный id товара} !обязательный параметр
+Ответ
+{
+    "result": true, // флаг успешности выполнения действи
+    "sum": "7 668,00",
+    "quant": "5 товаров",
+    "num": {
+        "sum": 7668,
+        "quant": 5
+    }
+}
+Удаление товара из корзины:
+Запрос
+GET | POST
+params:
+    mod=cart
+    client={ APIID клиента}  !обязательный параметр
+    action=remove
+    elementid={идентификатор позиции в корзине} !обязательный параметр
+Ответ
+{
+    "result": true,
+    "sum": "7 207,00",
+    "quant": "4 товара",
+    "num": {
+        "sum": 7207,
+        "quant": 4
+    },
+    "notif": {
+        "type": "success",
+        "text": "Товар успешно удален с корзины"
+    }
+}
+            
+Изменение количества товара в корзине
+Запрос
+GET | POST
+params:
+    mod=cart
+    client={ APIID клиента}  !обязательный параметр
+    action=change_count
+    elementid={идентификатор позиции в корзине} !обязательный параметр
+    quant={новое количество товара} !обязательный параметр
+Ответ
+{
+    "result": true,
+    "sum": "7 562,00",
+    "quant": "5 товаров",
+    "num": {
+        "sum": 7562,
+        "quant": 5
+    },
+    "item_quant": "2",
+    "notif": {
+        "type": "success",
+        "text": "Успешно"
+    }
+}
+            
+Оформление заказа из товаров в корзине
+Запрос
+GET | POST
+params:
+    mod=cart
+    client={ APIID клиента}  !обязательный параметр
+    action=order
+    items={массив elementid товаров в корзине} !обязательный параметр
+    forms={массив c данными оформления товароа} !обязательный параметр
+    forms[address]={ адрес доставки, Самовывоз либо параметр address c mod@account} !обязательный параметр
+    forms[pay_type]={ тип оплаты, nal,beznal} !обязательный параметр
+    forms[comment]={ комментарий к заказу }
+    forms[phys]={ true - если оформляем заказ как физ лицо }
+Ответ
+{
+    "result": true,
+    "sum": "4 568,00",
+    "quant": "2 товара",
+    "num": {
+        "sum": 4568,
+        "quant": 2
+    },
+    "notif": {
+        "type": "success",
+        "text": "Заказ успешно оформлен!"
+    }
+}
+
+
+6. Модуль "Заказы"
+Запрос
+GET | POST
+params:
+    mod=orders
+    client={ APIID клиента}  !обязательный параметр
+Ответ
+массив с ключем orders, в котором содержится информация о заказанных товарах
+
+[orders] => Array
+(
+    [[items][x][quantity]] => Количество единиц товара
+    [[items][x][date]] => Дата создания заказа
+    [[items][x][status]] => Статус заказа - см. [cases][answer_fields][items][x][status]
+    [[items][x][orderID]] => Идентификатор заказа
+    [[items][x][lastActivity]] => Дата последнего изменения статуса заказа
+    [[items][x][stocks]] => Информация о складе
+    [[items][x][stocks][store_id]] => Идентификатор склада
+    [[items][x][stocks][product_id]] => Идентификатор продукта
+    [[items][x][stocks][amount]] => Количество товара в заказе
+    [[items][x][stocks][price]] => Цена единицы товара
+    [[items][x][stocks][store_name]] => Название склада
+)
+Примеры
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=orders
+https://adkulan.kz/apiv2?client=f98282abe6f80739b9f16baec15201i3&mod=orders&debug
+
+
+7. Модуль "Склады"
+Запрос
+GET | POST
+params:
+    mod=stores
+    client={ APIID клиента}
+Ответ
+массив с ключями filials и stores, в котором содержится информация складаи и филиалах
+
+{
+  "filials": [
+    {
+      "id": "ID филиала",
+      "name": "Название филиала"
+    }
+  ],
+  "stores": [
+    {
+      "id": "ID склада",
+      "name": "Название склада",
+      "filial": "ID филиала"
+    }
+  ],
+  "answer_code": 200
+}
+
+
+
+                            

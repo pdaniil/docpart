@@ -1,0 +1,3 @@
+SELECT * 
+FROM `content` as `c1` inner join `content` as `c2` on `c1`.`id` = `c2`.`parent` 
+WHERE `c2`.`parent` != 0 AND `c1`.`is_frontend` = 1 AND `c2`.`is_frontend` = 1 AND `c2`.`system_flag` = 0 

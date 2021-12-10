@@ -1,0 +1,119 @@
+{% block details_result %}
+    {% for detail in details.oems %}
+        {% set detailLink = createUrl(
+        'aftermarket',
+        'findOem', '' ,
+        { 'detail_id': detail.detail_id, 'options': 'crosses,weights,names,properties,images' }
+        ) %}
+        <div class="am-detail">
+            <div class="am-detail-heading">
+            <span><a data-url="{{ detailLink }}"
+                     href="{{ detailLink }}">{{ detail.formattedoem }}</a></span>
+                <span><a class="manufacturerInfo" href="javascript:void(0)" id="manufacturerInfo{{ detail.detail_id }}"
+                         data-url="{{ createUrl('aftermarket', 'manufacturerinfo', '' , { 'manufacturerid': detail.manufacturer_id }) }}">{{ detail.manufacturer }}</a></span>
+                <span>{{ detail.weight ? 'Weight: ' ~ detail.weight : '' }}</span>
+                <span>{{ detail.volume ? detail.volume : '' }}</span>
+                <span>{{ detail.dimensions ? detail.dimensions : '' }}</span>
+                <br/>
+                {% for property in detail.properties %}
+                    <span class="am-detail-property-name">{{ property.property }}: </span>
+                    <span class="am-detail-property-value">{{ property.value }}</span><br/>
+                {% endfor %}
+            </div>
+            <div class="flex images-wrapper">
+                {% for image in detail.images %}
+                    <div data-full="{{ image.filename }}" class="aftermarket-detail-image">
+                        <img src="{{ image.thumbnailfilename }}" alt="">
+                    </div>
+                {% endfor %}
+            </div>
+            {% if detail.replacements %}
+                <table class="collapse table guayaquil_tablecatalog" style="width: 100%">
+                    <tr>
+                        <th></th>
+                        <th>Бренд</th>
+                        <th>Артикул</th>
+                        <th>Наименование</th>
+                        <th>Вес</th>
+                        <th>Объем</th>
+                        <th>Габаритные размеры</th>
+                    </tr>
+                    {% for replacement in detail.replacements %}
+                        {% set replacementManufacturerLink = createUrl(
+                        'aftermarket',
+                        'manufacturerinfo', '' ,
+                        { 'manufacturerid': replacement.manufacturer_id }) %}
+
+                        {% set replacementDetailLink = createUrl(
+                        'aftermarket',
+                        'findOem', '' ,
+                        { 'detail_id': replacement.detail_id, 'options': 'crosses,weights,names,properties,images' }) %}
+
+                        {% set detailAttrs = replacement.replacement_attributes %}
+
+                        <tr>
+                            <td>{{ detailAttrs.type ~ ' ' ~ detailAttrs.way }}</td>
+                            <td>
+                                <a class="manufacturerInfo"
+                                   id="manufacturerInfo{{ replacement.detail_id }}"
+                                   href="javascript:void(0)" id="manufacturerInfo"
+                                   data-url="{{ replacementManufacturerLink }}">
+                                    {{ replacement.manufacturer ? replacement.manufacturer : '' }}
+                                </a>
+                                <script type="text/javascript">
+                                    jQuery('#manufacturerInfo{{ replacement.detail_id }}').off('click');
+                                    jQuery('#manufacturerInfo{{ replacement.detail_id }}').on('click', function () {
+                                        var $this = jQuery(this);
+                                        $this.colorbox({
+                                            href: $this.data('url'),
+                                            title: '',
+                                            close: ''
+                                        });
+                                    });
+                                </script>
+                            </td>
+                            <td><a class="am-oem" data-url="{{ replacementDetailLink }}"
+                                   href="{{ replacementDetailLink }}">{{ replacement.formattedoem ? replacement.formattedoem : '' }}</a>
+                            </td>
+                            <td>{{ replacement.name ? replacement.name : '' }}</td>
+                            <td>{{ replacement.weight ? replacement.weight : '' }}</td>
+                            <td>{{ replacement.volume ? replacement.volume : '' }}</td>
+                            <td>{{ replacement.dimensions ? replacement.dimensions : '' }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
+    {% endfor %}
+    {% if not details.oems|length %}
+        <div class="details-not-found">
+            <span>{{ 'unitDetailsNoResulst'|t }}</span>
+        </div>
+    {% endif %}
+    <script type="text/javascript">
+        //jQuery(document).ready(function () {
+        //    jQuery(document).off('click', 'a.am-oem');
+        //    jQuery(document).on('click', 'a.am-oem', function (event) {
+        //
+        //        event.stopPropagation();
+        //        event.preventDefault();
+        //
+        //        showPreloader();
+        //
+        //        var url = jQuery(this).data('url');
+        //
+        //        jQuery.ajax({
+        //            url: url + '&format=raw',
+        //            success: function (data) {
+        //                var detailsContainer = jQuery(document).find('div#content');
+        //                if (data) {
+        //                    detailsContainer.html(data);
+        //                }
+        //                window.history.pushState([], '', url);
+        //                hidePreloader();
+        //            }
+        //        });
+        //    });
+        //});
+    </script>
+{% endblock %}

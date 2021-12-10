@@ -1,0 +1,12 @@
+<table class="table collapse" style="width: 100%;">
+    <tr>
+        {% for key, value in manufacturerInfo.attributes %}
+            <th>{{ key }}</th>
+        {% endfor %}
+    </tr>
+    <tr>
+        {% for key, value in manufacturerInfo.attributes %}
+            <td>{{ value }}</td>
+        {% endfor %}
+    </tr>
+</table>

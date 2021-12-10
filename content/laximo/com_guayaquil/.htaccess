@@ -1,0 +1,5 @@
+AddDefaultCharset Utf-8
+
+#Переадресация на единую точку входа (index.php в корне сайта)
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule (.*) https://store.safeapp.ru/katalog-laximo

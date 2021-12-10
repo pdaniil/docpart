@@ -1,0 +1,16 @@
+<div class="breadcrump-wrapper">
+    <ul class="laximo-breadcrumb" itemprop="breadcrumb">
+        <li><a href="{{ createUrl('catalogs', '', '', []) }}">{{ 'catalogsList'|t }}</a></li>
+        {% for item in pathway %}
+            {% if item.name != '' %}
+            <li class="{{ current|replace({'/' : ''}) == item.link ? 'current': '' }}">
+                {% if item.link != '' %}
+                    <a href="{{ item.link }}">{{ item.name }}</a>
+                {% else %}
+                    <a class="not-active" href="javascript:void(0)">{{ item.name }}</a>
+                {% endif %}
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>

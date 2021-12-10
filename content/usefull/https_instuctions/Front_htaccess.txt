@@ -1,0 +1,31 @@
+#Убираем / в конце URL
+RewriteEngine On
+RewriteBase /
+RewriteCond %{HTTP_HOST} (.*)
+RewriteCond %{REQUEST_URI} /$ [NC]
+RewriteRule ^(.*)(/)$ $1 [L,R=301]
+
+
+
+#!!! Нужно учитывать http и https
+#Править только протокол http/https
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.(.*)$
+RewriteRule ^(.*)$ https://%1/$1 [L,R=301]
+
+
+
+#!!! Этот блок только для HTTPS
+#Переадресация всех запросов с http на https
+RewriteEngine On
+#Если требуется добавить исключение нескольких URL#RewriteCond %{REQUEST_URI} !^/web_service  [NC,OR]
+RewriteCond %{REQUEST_URI} !^/web_service  [NC]
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+
+
+#Переадресация на единую точку входа (index.php в корне сайта)
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteRule (.*) index.php

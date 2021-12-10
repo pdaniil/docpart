@@ -1,0 +1,151 @@
+
+SELECT 
+
+`a`.id,
+`a`.caption,
+`a`.alias,
+`a`.storage_record_id,
+`a`.storage_id,
+`a`.customer_price,
+`a`.price,
+`a`.price_crossed_out,
+`a`.price_purchase,
+`a`.arrival_time,
+`a`.exist,
+`a`.reserved,
+`a`.issued,
+`a`.description,
+`a`.category_url,
+`a`.category_id,
+`a`.file_name,
+`a`.office_id,
+`a`.additional_time,
+`a`.mark,
+`a`.mark_1,
+`a`.mark_2,
+`a`.mark_3,
+`a`.mark_4,
+`a`.mark_5,
+`a`.marks_count,
+
+stickers_t.`value` AS sticker_value,
+stickers_t.id AS sticker_id,
+stickers_t.color_text AS sticker_color_text,
+stickers_t.color_background AS sticker_color_background,
+stickers_t.href AS sticker_href,
+stickers_t.class_css AS sticker_class_css,
+stickers_t.description AS sticker_description
+FROM
+(SELECT 
+`all_offices`.id,
+`all_offices`.caption,
+`all_offices`.alias,
+`all_offices`.storage_record_id,
+`all_offices`.storage_id,
+`all_offices`.customer_price,
+`all_offices`.price,
+`all_offices`.price_crossed_out,
+`all_offices`.price_purchase,
+`all_offices`.arrival_time,
+`all_offices`.exist,
+`all_offices`.reserved,
+`all_offices`.issued,
+`all_offices`.description,
+`all_offices`.category_url,
+`all_offices`.file_name,
+`all_offices`.category_id,
+`all_offices`.office_id,
+`all_offices`.additional_time,
+`all_offices`.mark,
+`all_offices`.mark_1,
+`all_offices`.mark_2,
+`all_offices`.mark_3,
+`all_offices`.mark_4,
+`all_offices`.mark_5,
+`all_offices`.marks_count
+FROM ( SELECT 
+			`all`.id,
+			`all`.caption,
+			`all`.alias,
+			`all`.storage_record_id,
+			`all`.storage_id,
+			`all`.customer_price,
+			`all`.price,
+			`all`.price_crossed_out,
+			`all`.price_purchase,
+			`all`.arrival_time,
+			`all`.exist,
+			`all`.reserved,
+			`all`.issued,
+			`all`.description,
+			`all`.category_url,
+			`all`.category_id,
+			`all`.file_name,
+			`all`.office_id,
+			`all`.additional_time,
+			`all`.mark,
+			`all`.mark_1,
+			`all`.mark_2,
+			`all`.mark_3,
+			`all`.mark_4,
+			`all`.mark_5,
+			`all`.marks_count,
+			`all`.`id` AS `idstr` 
+		FROM 
+			(SELECT
+				shop_catalogue_products.id AS id,
+				shop_catalogue_products.caption AS caption,
+				shop_catalogue_products.alias AS alias,
+				shop_storages_data.id AS storage_record_id,
+				shop_storages_data.storage_id AS storage_id,
+				CAST(shop_storages_data.customer_price AS decimal(10,2)) AS customer_price,
+				CAST(shop_storages_data.price*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) AS decimal(10,2)) AS price,
+				CAST(shop_storages_data.price_crossed_out*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) AS decimal(10,2)) AS price_crossed_out,
+				CAST(shop_storages_data.price_purchase*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) AS decimal(10,2)) AS price_purchase,
+				shop_storages_data.arrival_time AS arrival_time,
+				shop_storages_data.exist AS exist,
+				shop_storages_data.reserved AS reserved,
+				shop_storages_data.issued AS issued,
+				shop_products_text.content AS description,
+				shop_catalogue_categories.url AS category_url,
+				shop_catalogue_categories.id AS category_id,
+				(SELECT file_name FROM shop_products_images WHERE product_id = shop_catalogue_products.id LIMIT 1) AS file_name,
+				1 AS office_id,
+				(SELECT additional_time FROM shop_offices_storages_map WHERE office_id = 1 AND storage_id = shop_storages_data.storage_id LIMIT 1) AS additional_time,
+				
+				(SELECT ROUND(SUM(`mark`)/COUNT(`id`)) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id) AS mark,
+				(SELECT COUNT(`id`) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id AND mark=1) AS mark_1,
+				(SELECT COUNT(`id`) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id AND mark=2) AS mark_2,
+				(SELECT COUNT(`id`) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id AND mark=3) AS mark_3,
+				(SELECT COUNT(`id`) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id AND mark=4) AS mark_4,
+				(SELECT COUNT(`id`) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id AND mark=5) AS mark_5,
+				(SELECT COUNT(`id`) FROM shop_products_evaluations WHERE product_id = shop_catalogue_products.id) AS marks_count
+				
+			FROM
+				shop_catalogue_products
+
+			LEFT OUTER JOIN shop_catalogue_categories ON shop_catalogue_products.category_id = shop_catalogue_categories.id
+			
+			LEFT OUTER JOIN (SELECT *, `price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) + `price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) * (SELECT `markup`/100 AS `markup` FROM `shop_offices_storages_map` WHERE `office_id` = 1 AND `storage_id` = `shop_storages_data`.`storage_id` AND `group_id` = 2 AND `shop_storages_data`.`price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) >= `min_point` AND `shop_storages_data`.`price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) < `max_point`) AS `customer_price` FROM `shop_storages_data` WHERE `category_id` = 62 AND `storage_id` IN (SELECT DISTINCT(`storage_id`) FROM `shop_offices_storages_map` WHERE `office_id` = 1) ) shop_storages_data ON shop_catalogue_products.id = shop_storages_data.product_id
+			
+			LEFT OUTER JOIN shop_products_text ON shop_catalogue_products.id = shop_products_text.product_id
+			
+			WHERE
+				shop_catalogue_products.category_id = 62 AND shop_storages_data.customer_price >= 3500 AND shop_storages_data.customer_price <= 9200 ) AS `all`  ) AS all_offices INNER JOIN (SELECT DISTINCT(`id`) FROM ( SELECT 
+			*, `id` AS `idstr`
+		FROM 
+			(SELECT
+				shop_catalogue_products.id AS id,
+				shop_catalogue_products.caption AS caption,
+				CAST(shop_storages_data.customer_price AS decimal(10,2)) AS customer_price
+			FROM
+				shop_catalogue_products
+			LEFT OUTER JOIN shop_catalogue_categories ON shop_catalogue_products.category_id = shop_catalogue_categories.id
+			
+			LEFT OUTER JOIN (SELECT *, `price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) + `price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) * (SELECT `markup`/100 AS `markup` FROM `shop_offices_storages_map` WHERE `office_id` = 1 AND `storage_id` = `shop_storages_data`.`storage_id` AND `group_id` = 2 AND `shop_storages_data`.`price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) >= `min_point` AND `shop_storages_data`.`price`*(SELECT `rate` FROM `shop_currencies` WHERE `iso_code` = (SELECT `currency` FROM `shop_storages` WHERE `id` = `shop_storages_data`.`storage_id`) ) < `max_point`) AS `customer_price` FROM `shop_storages_data` WHERE `category_id` = 62 AND `storage_id` IN (SELECT DISTINCT(`storage_id`) FROM `shop_offices_storages_map` WHERE `office_id` = 1) ) shop_storages_data ON shop_catalogue_products.id = shop_storages_data.product_id
+			
+			WHERE
+				shop_catalogue_products.category_id = 62 AND shop_storages_data.customer_price >= 3500 AND shop_storages_data.customer_price <= 9200 ) AS `all`  GROUP BY `idstr` ORDER BY customer_price ASC, `idstr` ASC) AS limit_ids LIMIT 0, 10 ) limit_ids ON all_offices.id = limit_ids.id GROUP BY `idstr` ORDER BY customer_price ASC, `idstr` ASC) AS `a`
+LEFT JOIN
+  shop_products_stickers AS stickers_t
+    ON a.id = stickers_t.product_id

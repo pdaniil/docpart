@@ -1,0 +1,66 @@
+{% block unit %}
+    {% if oem %}
+        {% set cCois = [] %}
+        {% for detail in unit.details %}
+            {% if oem == detail.oem|replace({' ': '', '-': ''})  %}
+                {% set cCois = cCois|merge([detail.codeonimage]) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% set link = createUrl('unit', '', '', {
+            'c': vehicle.catalog,
+            'vid': vehicle.vehicleid ?: 0,
+            'uid': unit.unitid,
+            'gid': gid,
+            'cid': category.categoryid,
+            'ssd': unit.ssd,
+            'coi': oem ? cCois|join(', ') : code|join(', '),
+            'fromTask': 'qdetails'
+        })
+    %}
+
+    {% if unit.filter %}
+        {% set filterUrl = createUrl('unitfilter', '', '', {
+            'c': vehicle.catalog,
+            'vid': vehicle.vehicleid ?: 0,
+            'uid': unit.unitid,
+            'did': '',
+            'gid': gid,
+            'cid': category.categoryid,
+            'f': unit.filter,
+            'ssd': unit.ssd,
+            'fromTask' : 'qdetails',
+        }) %}
+    {% endif %}
+
+    <div class="unit" data-number="{{ loop.index }}">
+        <div class="guayaquil_unit_icons">
+            {% if unit.filter and not applicability %}
+                <div {{ 'id=filter data-url=' ~ filterUrl }} class="guayaquil_unit_filter qgroups-unit-filter">
+                    <img src="/content/laximo/com_guayaquil/assets/images/filter.png">
+                </div>
+            {% endif %}
+            {% if unit.imageurl != '' %}
+                <div class="guayaquil_zoom" link="{{ link }}" full="{{ unit.imageurl|replace({'%size%' : 'source'}) }}"
+                     title="<a href='{{ link }}'>{{ unit.name }}</a>" data-uid="{{ unit.unitid }}">
+                    <img src="/content/laximo/com_guayaquil/assets/images/zoom_{{ theme }}.png">
+                </div>
+            {% endif %}
+        </div>
+        <div class="gdImage">
+            <img class="img_group" src="{{ unit.imageurl != '' ? unit.imageurl|replace({'%size%' : '250'}) : noimage }}">
+        </div>
+        <a {% if unit.filter and not applicability %}
+               href="javascript:void(0)"
+               class="qgroups-unit-filter"
+               data-url="{{ filterUrl }}"
+           {% else %}
+               href="{{ link }}"
+           {% endif %}
+        >
+            <b>{{ unit.code }}: </b>
+            {{ unit.name }}
+        </a>
+    </div>
+{% endblock %}
