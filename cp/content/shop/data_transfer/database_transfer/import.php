@@ -45,8 +45,19 @@ if (!empty($_FILES) ) //Если есть файлы на загрузку
 		
 		<script>
 			
-			let url = "<?php echo $_SERVER["DOCUMENT_ROOT"].'/'.$DP_Config->backend_dir.'/content/shop/data_transfer/database_transfer/ajax_import/ajax_upload.php?'.$param; ?>";
+			let url_u = "<?php echo $_SERVER["DOCUMENT_ROOT"].'/'.$DP_Config->backend_dir.'/content/shop/data_transfer/database_transfer/ajax_import/ajax_upload.php?'.$param; ?>";
 			
+			console.log(url_u);
+			jQuery.ajax({
+				type: "GET",
+				async: true, //Запрос синхронный
+				url: url_u,
+				dataType: "text",//Тип возвращаемого значения
+				success: function(answer)
+				{
+					alert(answer);
+				}
+			}); 
 			
 			
 			

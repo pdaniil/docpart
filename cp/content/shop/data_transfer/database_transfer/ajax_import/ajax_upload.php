@@ -1,6 +1,6 @@
 <?php
-	defined('_ASTEXE_') or die('No access');
-	if (file_exists($_GET["name"])) 
+	//defined('_ASTEXE_') or die('No access');
+	if (file_exists($GET["name"])) 
 	{
 		$name = $_GET["name"];
 		//Конфигурация CMS
@@ -65,6 +65,8 @@
 	} 
 	else 
 	{
+		$f = fopen('name.txt', 'w');
+		fwrite($f, $_GET["name"]);
 		exit('Не удалось открыть файл.');
 	}
 	
